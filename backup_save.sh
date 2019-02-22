@@ -26,11 +26,14 @@ save() {
     ssh -p $port $host "mysqldump --single-transaction -h $MYSQL_HOST -u $MYSQL_USER --password=$MYSQL_PASS $MYSQL_DBNAME" > /data/backup/nextcloud-sqlbkp.bak
 
     # Historisation du dossier backup
-    zfs snapshot data/backup@nextcoud_`date +"%Y%m%d"`
+    zfs snapshot data/backup@nextcoud_`date +"%Y%m%d%H%M"`
 
-    # Retention du nombre de snapshot (limité à 30)
-    while [[ `zfs list -H -t snapshot -o name | wc -l` -gt 30 ]]; do
-        zfs destroy `zfs list -H -t snapshot -o name | head -1`
+    # Retention du nombre de snapshot (limité à 30 jours)
+    limit="data/backup@nextcoud_`date --date='-30 day' +"%Y%m%d%H%M"`"
+    for snap in `zfs list -H -t snapshot -o name` ; do
+        if [[ $snap < $limit ]]; then
+            zfs destroy $snap
+        fi
     done
 
     # Redémarrage du service Nextcloud sur le serveur
