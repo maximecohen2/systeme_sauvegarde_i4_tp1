@@ -27,3 +27,47 @@ Après avoir cloné le dépôt sur le serveur `Backup`, il faut donner les droit
 ```bash
 chmod +x backup_save.sh backup_restore.sh
 ``` 
+
+Afin que le serveur `Backup` puisse communiquer avec le serveur `Nextcloud` en ssh, il faut 
+générer une paire de clé ssh puis les envoyé sur le serveur `Nextcloud`.
+
+Depuis le serveur `Backup`:
+```bash
+# Génération de la paire de clé ssh
+ssh-keygen
+
+# Envoie de la clé public au serveur Nextcloud
+ssh-copy-id user@adress_nextloud
+``` 
+### Utilisation
+
+Le script `backup_save.sh` s'utilise ainsi:
+```bash
+./backup_save.sh [user@]hostname port
+```
+- **\[user@]hostname** : adresse de la machine nextcloud. L'utilisateur est optionnel.
+
+- **port** : port ssh de la machine nextcloud.
+ 
+Le script `backup_save.sh` s'utilise ainsi:
+```bash
+./backup_restore.sh [user@]hostname port [snapshot_name]
+```
+- **\[user@]hostname** : adresse de la machine nextcloud. L'utilisateur est optionnel.
+- **port** : port ssh de la machine nextcloud.
+- **\[snapshot_name]** : nom d'une snapshot de restauration. paramètre optionnel (defaut: snapshot
+la plus récente)
+
+### Automatisation
+
+Afin d'automatiser le processus de backup, il faut utiliser le service crontab.
+
+Pour éditer le fichier cron, il est recommandé d'utiliser la commande `crontab -e`.
+Une fois dans le fichier, rajouter la ligne suiavnte à la fin :
+```bash
+0 1 * * * /path/to/scripts/backup_save.sh [user@]hostname port
+```
+Le script `backup_save.sh` s'exécutera chaque jour à 1:00 H.
+
+
+ 
